@@ -19,7 +19,7 @@
 #define RESET   "\e[0;39m"
 
 // user-defined function prototypes
-char* get_guess(int wordsize, char* guess);
+void get_guess(int wordsize, char* guess);
 int check_word(char* guess, int wordsize, int status[], char* choice);
 void print_word(char* guess, int wordsize, int status[]);
 
@@ -31,14 +31,12 @@ int main(int argc, char* argv[])
 		printf("Usage: ./wordle wordsize (5-8)\n");
 		return 1;
 	}
-
 	int len = strlen(argv[1]);
 	if (len > 1)
 	{
 		printf("Error: wordsize must be either 5, 6, 7, or 8\n");
 		return 1;
 	}
-
 	int wordsize = argv[1][0] - '0';
 	if (!(wordsize >= 5 && wordsize <= 8))
 	{
@@ -66,8 +64,7 @@ int main(int argc, char* argv[])
 
 	// pseudorandomly select a word for this game
 	srand(time(NULL));
-	char choice[wordsize];
-	strcpy(choice, "");
+	char choice[wordsize + 1];
 	strcpy(choice, options[rand() % LISTSIZE]);
 
 	// allow one more guess than the length of the word
@@ -82,21 +79,23 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < guesses; i++)
 	{
 		// obtain user's guess
-		char guess[wordsize];
-		strcpy(guess, "");
-		strcpy(guess, get_guess(wordsize, guess));
+		char guess[wordsize + 1];
+		get_guess(wordsize, guess);
 
         	// array to hold guess status, initially set to zero
         	int status[wordsize];
 
         	// set all elements of status array initially to 0, aka WRONG
-        	// TODO #4
+		for (int i = 0; i < wordsize; i++)
+		{
+			status[i] = 0;
+		}
 
         	// Calculate score for the guess
         	int score = check_word(guess, wordsize, status, choice);
 
         	printf("Guess %i: ", i + 1);
-        
+
         	// Print the guess
         	print_word(guess, wordsize, status);
 
@@ -115,14 +114,24 @@ int main(int argc, char* argv[])
     	return 0;
 }
 
-char* get_guess(int wordsize, char* guess)
+void get_guess(int wordsize, char* guess)
 {
-	strcpy(guess, "");
+	char* userInput;
+	int userInputLen;
 
-    	// ensure users actually provide a guess that is the correct length
-    	// TODO #3
+	// ensure users actually provide a guess that is the correct length
+	do
+	{
+		printf("Input a 5-letter word: ");
+		fgets(userInput, (wordsize + 2), stdin);
+		userInputLen = strlen(userInput) - 1;
+	}
+	while (userInputLen != wordsize);
 
-    	return guess;
+	if (userInputLen == wordsize)
+	{
+		strncpy(guess, userInput, userInputLen);
+	}
 }
 
 int check_word(char* guess, int wordsize, int status[], char* choice)
