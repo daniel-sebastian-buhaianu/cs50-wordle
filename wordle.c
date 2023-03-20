@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <time.h>
 
@@ -18,19 +19,32 @@
 #define RESET   "\e[0;39m"
 
 // user-defined function prototypes
-char* get_guess(int wordsize);
+char* get_guess(int wordsize, char* guess);
 int check_word(char* guess, int wordsize, int status[], char* choice);
 void print_word(char* guess, int wordsize, int status[]);
 
-int main(int argc, string argv[])
+int main(int argc, char* argv[])
 {
 	// ensure proper usage
-	// TODO #1
+	if (argc != 2)
+	{
+		printf("Usage: ./wordle wordsize (5-8)\n");
+		return 1;
+	}
 
-	int wordsize = 0;
+	int len = strlen(argv[1]);
+	if (len > 1)
+	{
+		printf("Error: wordsize must be either 5, 6, 7, or 8\n");
+		return 1;
+	}
 
-	// ensure argv[1] is either 5, 6, 7, or 8 and store that value in wordsize instead
-	// TODO #2
+	int wordsize = argv[1][0] - '0';
+	if (!(wordsize >= 5 && wordsize <= 8))
+	{
+		printf("Error: wordsize must be either 5, 6, 7, or 8\n");
+		return 1;
+	}
 
 	// open correct file, each file has exactly LISTSIZE words
 	char wl_filename[6];
@@ -52,7 +66,9 @@ int main(int argc, string argv[])
 
 	// pseudorandomly select a word for this game
 	srand(time(NULL));
-	string choice = options[rand() % LISTSIZE];
+	char choice[wordsize];
+	strcpy(choice, "");
+	strcpy(choice, options[rand() % LISTSIZE]);
 
 	// allow one more guess than the length of the word
 	int guesses = wordsize + 1;
@@ -67,7 +83,8 @@ int main(int argc, string argv[])
 	{
 		// obtain user's guess
 		char guess[wordsize];
-		strcpy(guess, get_guess(wordsize));
+		strcpy(guess, "");
+		strcpy(guess, get_guess(wordsize, guess));
 
         	// array to hold guess status, initially set to zero
         	int status[wordsize];
@@ -98,9 +115,8 @@ int main(int argc, string argv[])
     	return 0;
 }
 
-char* get_guess(int wordsize)
+char* get_guess(int wordsize, char* guess)
 {
-	char* guess[wordsize];
 	strcpy(guess, "");
 
     	// ensure users actually provide a guess that is the correct length
